@@ -1,0 +1,97 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Fretboard Component Styles
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.fretboard-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  padding: var(--space-sm) 0;
+}
+
+.fretboard-svg {
+  width: 100%;
+  min-width: 760px;
+  height: auto;
+  display: block;
+}
+
+/* ── String labels ──────────────────────────────────────────────────────── */
+
+.fretboard-string-label {
+  fill: var(--text-secondary);
+  font-size: 14px;
+  font-weight: var(--fw-bold);
+  font-family: var(--font-mono);
+  transition: fill var(--transition-fast), text-shadow var(--transition-fast);
+}
+
+/* ── Fret numbers ───────────────────────────────────────────────────────── */
+
+.fretboard-fret-number {
+  fill: var(--text-muted);
+  font-size: 10px;
+  font-weight: var(--fw-semi);
+  font-family: var(--font-mono);
+}
+
+/* ── Note labels on highlighted circles ─────────────────────────────────── */
+
+.fretboard-note-label {
+  fill: #0c0e14;
+  font-size: 10px;
+  font-weight: var(--fw-black);
+  font-family: var(--font-family);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Hit zones ──────────────────────────────────────────────────────────── */
+
+.fretboard-hit-zone {
+  cursor: pointer;
+  transition: fill var(--transition-fast);
+}
+
+.fretboard-hit-zone.hit-zone-highlighted {
+  fill: rgba(255, 255, 255, 0.08) !important;
+}
+
+.fretboard-hit-zone:hover {
+  fill: rgba(255, 255, 255, 0.06) !important;
+}
+
+.fretboard-hit-zone.hit-zone-highlighted:hover {
+  fill: transparent !important;
+}
+
+/* Open string hit zones */
+.open-string-group {
+  cursor: pointer;
+}
+
+.open-string-group:hover .fretboard-string-label {
+  fill: var(--text-primary);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+}
+
+.open-string-group.hit-zone-highlighted .fretboard-string-label {
+  fill: var(--accent);
+  text-shadow: 0 0 10px var(--accent);
+}
+
+/* ── Pulsing note animation ─────────────────────────────────────────────── */
+
+.note-pulse circle {
+  animation: notePulse 1.8s ease-in-out infinite;
+}
+
+@keyframes notePulse {
+  0%, 100% {
+    r: 12;
+    opacity: 0.92;
+  }
+  50% {
+    r: 14;
+    opacity: 1;
+  }
+}
