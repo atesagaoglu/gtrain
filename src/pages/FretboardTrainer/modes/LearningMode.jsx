@@ -11,7 +11,7 @@ import { useGuitarSound } from '../../../hooks/useGuitarSound';
 export default function LearningMode({ numFrets = DEFAULT_NUM_FRETS }) {
   const [revealedNotes, setRevealedNotes] = useState([]);
   const [showAll, setShowAll] = useState(false);
-  const { tuning, accidentalPref, hideInstructions, setHideInstructions } = useSettings();
+  const { tuning, accidentalPref } = useSettings();
   const { playNote, initAudio } = useGuitarSound();
 
   const handleFretClick = useCallback((stringIdx, fret) => {
@@ -73,26 +73,13 @@ export default function LearningMode({ numFrets = DEFAULT_NUM_FRETS }) {
   };
 
   return (
-    <div>
-      {!hideInstructions && (
-        <div className="mode-instructions" style={{ position: 'relative' }}>
-          <button 
-            onClick={() => setHideInstructions(true)}
-            style={{ position: 'absolute', top: 4, right: 8, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.2rem', lineHeight: 1 }}
-            title="Dismiss"
-          >
-            ✕
-          </button>
-          <span className="mode-instructions-text">
-            Click any position on the fretboard (or the string labels) to reveal its note and hear its pitch.
-            Click again to hide it. Natural notes are shown in <strong>amber</strong>, accidentals in <strong>gold</strong>.
-          </span>
-        </div>
-      )}
-
+    <div className="game-wrapper">
       <div className="mode-toolbar">
-        <button className="btn btn-ghost" onClick={handleShowAll} id="btn-show-all">
-          {showAll ? 'Hide All' : 'Show All Notes'}
+        <button 
+          className={`btn ${showAll ? 'btn-primary' : 'btn-outline'}`}
+          onClick={handleShowAll}
+        >
+          {showAll ? 'Hide All Notes' : 'Show All Notes'}
         </button>
         <button className="btn btn-ghost" onClick={handleClear} id="btn-clear">
           Clear
@@ -104,7 +91,7 @@ export default function LearningMode({ numFrets = DEFAULT_NUM_FRETS }) {
         )}
       </div>
 
-      <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
+      <div className="glass-card" style={{ padding: 'var(--space-xl)' }}>
         <Fretboard
           onFretClick={handleFretClick}
           highlightedFrets={revealedNotes}

@@ -33,7 +33,10 @@ export function SettingsProvider({ children }) {
   const [skin, setSkin] = useStickyState('rosewood', 'gtrain_skin');
   const [showFretNumbers, setShowFretNumbers] = useStickyState(true, 'gtrain_showFretNumbers');
   const [numFrets, setNumFrets] = useStickyState(24, 'gtrain_numFrets');
-  const [hideInstructions, setHideInstructions] = useStickyState(false, 'gtrain_hideInstructions');
+  const [hideInstructions, setHideInstructions] = useStickyState({}, 'gtrain_hideInstructions');
+  const [activeMode, setActiveMode] = useStickyState('learn', 'gtrain_activeMode');
+  const [intervalMode, setIntervalMode] = useStickyState('math', 'gtrain_intervalMode');
+  const [intervalNotation, setIntervalNotation] = useStickyState('name', 'gtrain_intervalNotation');
 
   return (
     <SettingsContext.Provider
@@ -45,7 +48,10 @@ export function SettingsProvider({ children }) {
         skin, setSkin,
         showFretNumbers, setShowFretNumbers,
         numFrets, setNumFrets,
-        hideInstructions, setHideInstructions
+        hideInstructions, setHideInstructions,
+        activeMode, setActiveMode,
+        intervalMode, setIntervalMode,
+        intervalNotation, setIntervalNotation
       }}
     >
       {children}

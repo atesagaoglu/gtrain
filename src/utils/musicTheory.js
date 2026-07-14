@@ -11,6 +11,22 @@ export const NOTES = [
   'F#', 'G', 'G#', 'A', 'A#', 'B',
 ];
 
+/** Interval names and abbreviations for absolute semitone distances. */
+export const INTERVAL_NAMES = {
+  1: { name: 'Minor Second', abbr: 'm2' },
+  2: { name: 'Major Second', abbr: 'M2' },
+  3: { name: 'Minor Third', abbr: 'm3' },
+  4: { name: 'Major Third', abbr: 'M3' },
+  5: { name: 'Perfect Fourth', abbr: 'P4' },
+  6: { name: 'Tritone', abbr: 'TT' },
+  7: { name: 'Perfect Fifth', abbr: 'P5' },
+  8: { name: 'Minor Sixth', abbr: 'm6' },
+  9: { name: 'Major Sixth', abbr: 'M6' },
+  10: { name: 'Minor Seventh', abbr: 'm7' },
+  11: { name: 'Major Seventh', abbr: 'M7' },
+  12: { name: 'Perfect Octave', abbr: 'P8' },
+};
+
 /** Enharmonic flat names keyed by sharp name. */
 export const ENHARMONIC_FLATS = {
   'C#': 'Db',
@@ -107,10 +123,6 @@ export class Note {
   /** Return a new Note transposed up/down by `semitones`. */
   add(semitones) {
     return new Note(this._midi + semitones);
-  }
-
-  subtract(semitones) {
-    return new Note(this._midi - semitones);
   }
 
   /** The interval (in semitones) from this note up to `other`. */
@@ -227,18 +239,50 @@ export function findNoteOnString(noteName, stringIndex, tuning = STANDARD_TUNING
 // ─── Quiz helpers ────────────────────────────────────────────────────────────
 
 /**
- * Generate `count` unique distractor pitch classes (excluding `correctNote`).
+ * Generate `count` unique distractor pitch classes clustered around the target note.
+ * @param {string} targetNoteName - The correct note name to cluster around.
+ * @param {string|string[]} excludeNotes - Additional notes to exclude (the target note is excluded automatically).
+ * @param {number} count - Number of distractors to generate.
  */
-export function generateDistractors(correctNote, count = 3) {
-  const correct = Note.from(correctNote);
-  const pool = NOTES.filter((n) => n !== correct.name);
+export function generateDistractors(targetNoteName, excludeNotes = [], count = 3) {
+  const targetNote = Note.from(targetNoteName);
+  
+  const excludeArray = Array.isArray(excludeNotes) 
+    ? excludeNotes.map(n => Note.from(n).name)
+    : [Note.from(excludeNotes).name];
+  
+  // Always exclude the target note itself
+  excludeArray.push(targetNote.name);
 
-  for (let i = pool.length - 1; i > 0 && i >= pool.length - count; i--) {
+  // Generate offsets ordered by proximity: -1, +1, -2, +2, -3, +3, etc.
+  const offsets = [];
+  for (let i = 1; i <= 6; i++) {
+    // Randomize whether we check + or - first for a given distance, 
+    // to prevent distractors from always leaning in one direction.
+    if (Math.random() > 0.5) {
+      offsets.push(i, -i);
+    } else {
+      offsets.push(-i, i);
+    }
+  }
+
+  const pool = [];
+  for (const offset of offsets) {
+    const candidateName = targetNote.add(offset).name;
+    // Ensure we don't add duplicates or excluded notes
+    if (!excludeArray.includes(candidateName) && !pool.includes(candidateName)) {
+      pool.push(candidateName);
+    }
+    if (pool.length >= count) break;
+  }
+
+  // Shuffle the selected distractors so they aren't completely predictable
+  for (let i = pool.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [pool[i], pool[j]] = [pool[j], pool[i]];
   }
 
-  return pool.slice(-count);
+  return pool;
 }
 
 export function getRandomString(tuningLength = 6) {

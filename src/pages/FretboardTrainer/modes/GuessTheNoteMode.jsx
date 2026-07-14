@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import Fretboard from '../../../components/Fretboard/Fretboard';
 import {
   DEFAULT_NUM_FRETS,
@@ -24,12 +24,24 @@ export default function GuessTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
   const [streak, setStreak] = useState(0);
   const [total, setTotal] = useState(0);
 
+  const scoreRef = useRef(0);
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+
   const newQuestion = useCallback(() => {
     const stringIdx = getRandomString(tuning.length);
     const fret = getRandomFret(numFrets);
 
+    const currentScore = scoreRef.current;
+    let distractorCount = 1; // starts with 2 choices
+    if (currentScore >= 12) distractorCount = 5;
+    else if (currentScore >= 9) distractorCount = 4;
+    else if (currentScore >= 6) distractorCount = 3;
+    else if (currentScore >= 3) distractorCount = 2;
+
     const actualNote = getNoteAtFret(tuning[stringIdx], fret);
-    const distractors = generateDistractors(actualNote.name, 3).map(name => Note.from(name));
+    const distractors = generateDistractors(actualNote.name, [], distractorCount).map(name => Note.from(name));
 
     const options = [actualNote, ...distractors];
     // Shuffle options
@@ -46,8 +58,12 @@ export default function GuessTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
   }, [numFrets, tuning]);
 
   useEffect(() => {
-    newQuestion();
-  }, [newQuestion]);
+    // Only generate on first mount to prevent loops if we added dependencies
+    if (!choices.length) {
+      newQuestion();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleChoice = useCallback(
     (index) => {
@@ -96,12 +112,14 @@ export default function GuessTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
   ];
 
   return (
-    <div>
+    <div className="game-wrapper">
       <div className="prompt-card">
-        <div>
-          <div className="prompt-label">What note is at</div>
-          <div className="prompt-string">
-            {questionFret.string + 1} ({displayStringName}), Fret {questionFret.fret}
+        <div className="prompt-question">
+          <div>
+            <div className="prompt-label">What note is at</div>
+            <div className="prompt-string">
+              {questionFret.string + 1} ({displayStringName}), Fret {questionFret.fret}
+            </div>
           </div>
         </div>
 
@@ -125,7 +143,7 @@ export default function GuessTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
+      <div className="glass-card" style={{ padding: 'var(--space-xl)' }}>
         <Fretboard
           highlightedFrets={highlights}
           numFrets={numFrets}

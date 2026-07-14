@@ -1,10 +1,9 @@
-import { useState } from 'react';
+
 import { DEFAULT_NUM_FRETS, FRET_PRESETS } from '../../utils/musicTheory';
 import { useSettings } from '../../contexts/SettingsContext';
 import LearningMode from './modes/LearningMode';
 import FindTheNoteMode from './modes/FindTheNoteMode';
 import GuessTheNoteMode from './modes/GuessTheNoteMode';
-import SettingsDrawer from '../../components/SettingsDrawer/SettingsDrawer';
 import './FretboardTrainer.css';
 
 const MODES = [
@@ -14,9 +13,7 @@ const MODES = [
 ];
 
 export default function FretboardTrainer() {
-  const [activeMode, setActiveMode] = useState('learn');
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const { tuning, accidentalPref, numFrets } = useSettings();
+  const { tuning, accidentalPref, numFrets, hideInstructions, setHideInstructions, activeMode, setActiveMode } = useSettings();
 
   const renderMode = () => {
     switch (activeMode) {
@@ -28,20 +25,9 @@ export default function FretboardTrainer() {
   };
 
   return (
-    <div className="trainer-page animate-fade-in">
-      <header className="trainer-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+    <div className="page-container animate-fade-in">
+      <header className="trainer-header">
         <h1 className="trainer-title">Fretboard Trainer</h1>
-        <button
-          className="btn btn-ghost"
-          onClick={() => setIsDrawerOpen(true)}
-          title="Settings"
-          style={{ padding: '8px' }}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        </button>
       </header>
 
       {/* ── Mode selector ─────────────────────────────────────────────── */}
@@ -66,7 +52,54 @@ export default function FretboardTrainer() {
         {renderMode()}
       </div>
 
-      <SettingsDrawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)} />
+      {/* ── Help Modal ────────────────────────────────────────────────── */}
+      {(!hideInstructions || !hideInstructions[activeMode]) && (
+        <div 
+          className="drawer-overlay open" 
+          onClick={() => setHideInstructions(prev => {
+            const current = typeof prev === 'object' && prev !== null ? prev : {};
+            return { ...current, [activeMode]: true };
+          })} 
+          style={{ zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        >
+          <div 
+            className="glass-card animate-fade-in" 
+            style={{ maxWidth: 500, padding: 'var(--space-xl)', position: 'relative', margin: '0 var(--space-md)' }} 
+            onClick={e => e.stopPropagation()}
+          >
+            <button 
+              onClick={() => setHideInstructions(prev => {
+                const current = typeof prev === 'object' && prev !== null ? prev : {};
+                return { ...current, [activeMode]: true };
+              })}
+              style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1.5rem', lineHeight: 1 }}
+              title="Close"
+            >
+              ✕
+            </button>
+            <h2 style={{ marginBottom: 'var(--space-md)' }}>
+              {activeMode === 'learn' && 'Learning Mode'}
+              {activeMode === 'find' && 'Find the Note'}
+              {activeMode === 'guess' && 'Guess the Note'}
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, fontSize: 'var(--fs-md)' }}>
+              {activeMode === 'learn' && 'Click any position on the fretboard (or the string labels) to reveal its note and hear its pitch. Click again to hide it. Natural notes are shown in amber, accidentals in gold.'}
+              {activeMode === 'find' && 'Click on the fretboard to find all instances of a specific note on the given string. Test your horizontal fretboard navigation skills!'}
+              {activeMode === 'guess' && 'Identify the correct note at the highlighted fret. The choices will dynamically increase from 2 options up to 6 as you build a hot streak!'}
+            </p>
+            <button 
+              className="btn btn-primary" 
+              style={{ marginTop: 'var(--space-lg)', width: '100%' }} 
+              onClick={() => setHideInstructions(prev => {
+                const current = typeof prev === 'object' && prev !== null ? prev : {};
+                return { ...current, [activeMode]: true };
+              })}
+            >
+              Got it!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -11,7 +11,7 @@ import { useSettings } from '../../../contexts/SettingsContext';
 import { useGuitarSound } from '../../../hooks/useGuitarSound';
 
 export default function FindTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
-  const { tuning, accidentalPref, hideInstructions, setHideInstructions } = useSettings();
+  const { tuning, accidentalPref } = useSettings();
   const { playNote, initAudio } = useGuitarSound();
 
   const [targetNoteObj, setTargetNoteObj] = useState(null);
@@ -22,6 +22,7 @@ export default function FindTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  const [correctAttempts, setCorrectAttempts] = useState(0);
 
   const newQuestion = useCallback(() => {
     const stringIdx = getRandomString(tuning.length);
@@ -52,6 +53,7 @@ export default function FindTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
       setAttempts((a) => a + 1);
 
       if (isCorrect) {
+        setCorrectAttempts((c) => c + 1);
         const newHighlights = [
           ...highlights,
           {
@@ -115,21 +117,29 @@ export default function FindTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
   }
 
   return (
-    <div>
+    <div className="game-wrapper">
       <div className="prompt-card">
-        <div>
-          <div className="prompt-label">Find this note</div>
-          <div className="prompt-note">{targetNoteObj.formatName(accidentalPref)}</div>
-        </div>
-        <div className="prompt-divider" />
-        <div>
-          <div className="prompt-label">On string</div>
-          <div className="prompt-string">
-            {targetString + 1} ({displayStringName})
+        <div className="prompt-question">
+          <div>
+            <div className="prompt-label">Find this note</div>
+            <div className="prompt-note">{targetNoteObj.formatName(accidentalPref)}</div>
+          </div>
+          <div className="prompt-divider" />
+          <div>
+            <div className="prompt-label">On string</div>
+            <div className="prompt-string">
+              {targetString + 1} ({displayStringName})
+            </div>
           </div>
         </div>
 
         <div className="score-display">
+          <div className="score-item">
+            <span className="score-value">
+              {attempts > 0 ? `${Math.round((correctAttempts / attempts) * 100)}%` : '—'}
+            </span>
+            <span className="score-label">Accuracy</span>
+          </div>
           <div className="score-item">
             <span className="score-value">{score}</span>
             <span className="score-label">Score</span>
@@ -143,7 +153,7 @@ export default function FindTheNoteMode({ numFrets = DEFAULT_NUM_FRETS }) {
         </div>
       </div>
 
-      <div className="glass-card" style={{ padding: 'var(--space-md)' }}>
+      <div className="glass-card" style={{ padding: 'var(--space-xl)' }}>
         <Fretboard
           onFretClick={handleFretClick}
           highlightedFrets={highlights}

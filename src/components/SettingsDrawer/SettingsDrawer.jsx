@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSettings } from '../../contexts/SettingsContext';
 import { TUNINGS, NOTES, Note } from '../../utils/musicTheory';
 import './SettingsDrawer.css';
@@ -17,7 +17,7 @@ const SKINS = [
   { id: 'ebony',    label: 'Ebony' }
 ];
 
-export default function SettingsDrawer({ isOpen, onClose }) {
+export default function SettingsDrawer({ isOpen, onClose, showFretboardSettings = true }) {
   const { 
     tuning, setTuning,
     soundProfile, setSoundProfile,
@@ -25,10 +25,18 @@ export default function SettingsDrawer({ isOpen, onClose }) {
     accidentalPref, setAccidentalPref,
     soundEnabled, setSoundEnabled,
     showFretNumbers, setShowFretNumbers,
-    numFrets, setNumFrets
+    numFrets, setNumFrets,
+    intervalNotation, setIntervalNotation
   } = useSettings();
 
   const [customTuning, setCustomTuning] = useState(tuning);
+  const [hasRendered, setHasRendered] = useState(false);
+
+  useEffect(() => {
+    // Prevent CSS transitions from firing on initial load by waiting a tick
+    const timer = setTimeout(() => setHasRendered(true), 50);
+    return () => clearTimeout(timer);
+  }, []);
 
   const isStandard = tuning.join(',') === TUNINGS.standard.notes.join(',');
   const isDropD = tuning.join(',') === TUNINGS.dropD.notes.join(',');
@@ -47,8 +55,16 @@ export default function SettingsDrawer({ isOpen, onClose }) {
 
   return (
     <>
-      <div className={`drawer-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
-      <div id="settings-drawer" className={`settings-drawer ${isOpen ? 'open' : ''}`}>
+      <div 
+        className={`drawer-overlay ${isOpen ? 'open' : ''}`} 
+        onClick={onClose} 
+        style={!hasRendered ? { transition: 'none', opacity: 0 } : undefined}
+      />
+      <div 
+        id="settings-drawer" 
+        className={`settings-drawer ${isOpen ? 'open' : ''}`}
+        style={!hasRendered ? { transition: 'none', transform: 'translateX(100%)' } : undefined}
+      >
         <div className="drawer-header">
           <h2>Settings</h2>
           <button className="btn btn-ghost" onClick={onClose}>Close</button>
@@ -59,26 +75,30 @@ export default function SettingsDrawer({ isOpen, onClose }) {
           {/* General App Settings */}
           <h3>General</h3>
           <div className="tuning-presets">
-            <div className="setting-group" style={{ marginBottom: 'var(--space-sm)' }}>
-              <label className="tuning-help">Total Frets</label>
-              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
-                {[12, 15, 21, 22, 24].map((n) => (
-                  <button
-                    key={n}
-                    className={`preset-btn ${numFrets === n ? 'active' : ''}`}
-                    onClick={() => setNumFrets(n)}
-                    style={{ padding: '4px 10px' }}
-                  >{n}</button>
-                ))}
-              </div>
-            </div>
-            <button
-              className={`preset-btn ${showFretNumbers ? 'active' : ''}`}
-              onClick={() => setShowFretNumbers(!showFretNumbers)}
-              style={{ marginBottom: 'var(--space-sm)' }}
-            >
-              Fret Numbers: {showFretNumbers ? 'Visible' : 'Hidden'}
-            </button>
+            {showFretboardSettings && (
+              <>
+                <div className="setting-group" style={{ marginBottom: 'var(--space-sm)' }}>
+                  <label className="tuning-help">Total Frets</label>
+                  <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                    {[12, 15, 21, 22, 24].map((n) => (
+                      <button
+                        key={n}
+                        className={`preset-btn ${numFrets === n ? 'active' : ''}`}
+                        onClick={() => setNumFrets(n)}
+                        style={{ padding: '4px 10px' }}
+                      >{n}</button>
+                    ))}
+                  </div>
+                </div>
+                <button
+                  className={`preset-btn ${showFretNumbers ? 'active' : ''}`}
+                  onClick={() => setShowFretNumbers(!showFretNumbers)}
+                  style={{ marginBottom: 'var(--space-sm)' }}
+                >
+                  Fret Numbers: {showFretNumbers ? 'Visible' : 'Hidden'}
+                </button>
+              </>
+            )}
             <div className="setting-group" style={{ marginBottom: 'var(--space-lg)' }}>
               <label className="tuning-help">Accidentals</label>
               <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
@@ -94,6 +114,20 @@ export default function SettingsDrawer({ isOpen, onClose }) {
                   className={`preset-btn ${accidentalPref === 'both' ? 'active' : ''}`}
                   onClick={() => setAccidentalPref('both')}
                 >Both</button>
+              </div>
+            </div>
+
+            <div className="setting-group" style={{ marginBottom: 'var(--space-lg)' }}>
+              <label className="tuning-help">Interval Notation</label>
+              <div style={{ display: 'flex', gap: 'var(--space-sm)' }}>
+                <button
+                  className={`preset-btn ${intervalNotation === 'name' ? 'active' : ''}`}
+                  onClick={() => setIntervalNotation('name')}
+                >Full Name</button>
+                <button
+                  className={`preset-btn ${intervalNotation === 'abbr' ? 'active' : ''}`}
+                  onClick={() => setIntervalNotation('abbr')}
+                >Abbreviation</button>
               </div>
             </div>
           </div>
@@ -138,9 +172,11 @@ export default function SettingsDrawer({ isOpen, onClose }) {
 
           <div className="settings-divider-horizontal" />
 
-          {/* Tuning Options */}
-          <h3>Tuning Options</h3>
-          <div className="tuning-presets">
+          {showFretboardSettings && (
+            <>
+              {/* Tuning Options */}
+              <h3>Tuning Options</h3>
+              <div className="tuning-presets">
             <button
               className={`preset-btn ${isStandard && !showCustom ? 'active' : ''}`}
               onClick={() => { setTuning(TUNINGS.standard.notes); setCustomTuning(TUNINGS.standard.notes); setShowCustom(false); }}
@@ -206,6 +242,8 @@ export default function SettingsDrawer({ isOpen, onClose }) {
               </button>
             </>
           )}
+        </>
+      )}
 
         </div>
       </div>

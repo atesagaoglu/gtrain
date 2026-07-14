@@ -1,0 +1,78 @@
+
+
+.math-header {
+  margin-bottom: var(--space-2xl);
+}
+
+.math-title {
+  font-size: var(--fs-3xl);
+  font-weight: 700;
+  margin-bottom: var(--space-xs);
+  background: linear-gradient(135deg, #fff, #a0a5b1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.math-subtitle {
+  color: var(--text-secondary);
+  font-size: var(--fs-lg);
+}
+
+
+
+.math-prompt-card {
+  width: 100%;
+  padding: var(--space-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.math-equation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-lg);
+  font-size: 5rem;
+  font-weight: 800;
+  margin-bottom: var(--space-2xl);
+  flex-wrap: wrap;
+}
+
+.math-root {
+  color: var(--accent);
+  font-size: 6rem;
+  line-height: 1;
+}
+
+.math-operator {
+  color: var(--text-primary);
+  font-size: 5rem;
+  line-height: 1;
+}
+
+.math-label {
+  color: var(--text-secondary);
+  font-size: 3rem;
+  font-weight: 600;
+}
+
+.math-question-mark {
+  color: var(--accent-light);
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 4px dashed var(--accent);
+  border-radius: var(--radius-xl);
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 6rem;
+  line-height: 1;
+}
+
+/* Override score-display inherited from FretboardTrainer */
+.math-prompt-card .score-display {
+  margin: 0 auto;
+  justify-content: center;
+}
