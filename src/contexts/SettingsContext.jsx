@@ -37,6 +37,7 @@ export function SettingsProvider({ children }) {
   const [activeMode, setActiveMode] = useStickyState('learn', 'gtrain_activeMode');
   const [intervalMode, setIntervalMode] = useStickyState('math', 'gtrain_intervalMode');
   const [intervalNotation, setIntervalNotation] = useStickyState('name', 'gtrain_intervalNotation');
+  const [chordTypeFilter, setChordTypeFilter] = useStickyState([], 'gtrain_chordTypeFilter');
 
   return (
     <SettingsContext.Provider
@@ -51,7 +52,8 @@ export function SettingsProvider({ children }) {
         hideInstructions, setHideInstructions,
         activeMode, setActiveMode,
         intervalMode, setIntervalMode,
-        intervalNotation, setIntervalNotation
+        intervalNotation, setIntervalNotation,
+        chordTypeFilter, setChordTypeFilter
       }}
     >
       {children}
